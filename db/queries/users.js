@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import db from "../client.js";
 
-export async function createUser(username, password_hash, email) {
+export async function createUser(username, password, email) {
   const sql = `
   INSERT INTO users
     (username, password_hash, email)
@@ -9,10 +9,10 @@ export async function createUser(username, password_hash, email) {
     ($1, $2, $3)
   RETURNING * ;
   `;
-  const password_hash = await bcrypt.hash(password_hash, 100); 
+  const hashedPassword = await bcrypt.hash(password, 10); 
   const {
     rows: [user],
-  } = await db.query(sql, [username, password_hash, email]);
+  } = await db.query(sql, [username, hashedPassword, email]);
   return user;
 }
 

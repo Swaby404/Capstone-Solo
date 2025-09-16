@@ -3,6 +3,7 @@ import db from "#db/client";
 import { createUser } from "#db/queries/users";
 import { createComment } from "#db/queries/comments";
 import { createDestination } from "#db/queries/destinations";
+import bcrypt from "bcrypt";
 
 (async () => {
   await db.connect();
@@ -10,8 +11,6 @@ import { createDestination } from "#db/queries/destinations";
   await db.end();
   console.log("🌱 Database seeded.");
 })();
-
-import bcrypt from "bcrypt";
 
 async function seed() {
   // create User
@@ -21,13 +20,17 @@ async function seed() {
     throw new Error("User creation failed");
   }
 
-  // create 8 destinations for the user
-  const destinations = ['Japan', 'England', 'United States', 'Nigeria', 'Cayman Islands', 'Singapore', 'Nepal', 'Italy'];
+  // create 8 destinations for the user with images
+  const destinations = [{'name': 'Japan', 'image': 'japan.jpg'}, {'name': 'England', 'image': 'england.jpg'}, {'name': 'United States', 'image': 'usa.jpg'}, {'name': 'Nigeria', 'image': 'nigeria.jpg'}, {'name': 'Cayman Islands', 'image': 'cayman.jpg'}, {'name': 'Singapore', 'image': 'singapore.jpg'}, {'name': 'Nepal', 'image': 'nepal.jpg'}, {'name': 'Italy', 'image': 'italy.jpg'}];
   for (let i = 0; i < destinations.length; i++) {
-    const destinationName = destinations[i];
+    const destinationName = destinations[i].name;
+    const destinationImage = destinations[i].image;
     try {
       // create destination for the user
-      const destination = await createDestination({ user_id: user.id, name: destinationName });
+      const destination = await createDestination({ user_id: user.id, name: destinationName, image: destinationImage });
+      if (!destination || !destination.id) {
+        throw new Error(`Destination creation failed for ${destinationName}`);
+      }
       console.log(`Seeded destination (${i}): ${destinationName}`);
 
       // each destination should have 5 comments
